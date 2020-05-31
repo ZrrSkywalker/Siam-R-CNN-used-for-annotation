@@ -75,10 +75,10 @@ class CascadeRCNNHead(object):
         """
         reg_weights = tf.constant(cfg.CASCADE.BBOX_REG_WEIGHTS[stage], dtype=tf.float32) # 创建cascade的权重，是持久化常量浮点数
         pooled_feature = self.roi_func(proposals.boxes)  # N,C,S,S
-        
-        # FIXME
-        if roi_func_extra != None:
-             pooled_feature = tf.concate([pooled_feature, self.roi_func_extra(proposals.boxes)], 0)
+        if self.roi_func_extra != None:
+            #  pooled_feature = tf.concat([pooled_feature, self.roi_func_extra(proposals.boxes)], 0)
+            
+            pooled_feature = (self.roi_func_extra(proposals.boxes) + pooled_feature) / 2
         pooled_feature = self.scale_gradient(pooled_feature)    # 这里不太理解为什么重新赋值
         
         head_feature = self.fastrcnn_head_func('head', pooled_feature)
