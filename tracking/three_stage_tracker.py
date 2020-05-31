@@ -8,6 +8,9 @@ from config import config as cfg
 from tracking.argmax_tracker import PrecomputingReferenceTracker
 from tracking.util import resize_and_clip_boxes, generate_colors, xyxy_to_cxcywh_np
 
+# FIXME
+import tensorflow as tf
+
 VIZ_WITH_OPENCV = True
 
 
@@ -94,6 +97,9 @@ class ThreeStageTracker(PrecomputingReferenceTracker):
         self._ff_gt_tracklet = Tracklet(start_time=0)
         self._ff_gt_tracklet.add_detection(self._ff_gt_feats, self._ff_box, 1.0, 1.0)
         self._all_tracklets = [self._ff_gt_tracklet]
+        
+        # FIXME
+        self.saved_feats.append(self._ff_gt_feats)
 
     def _make_pred_func(self, load):
         cfg.MODE_THIRD_STAGE = True
@@ -243,7 +249,13 @@ class ThreeStageTracker(PrecomputingReferenceTracker):
 
         # FIXME
         if cfg.MODE_EXTRA_FEATURES is not None:
-            self.saved_feats.append(tracklet.feats[-1])
+            if tracklet.feats is not None:
+                self.saved_feats.append(tracklet.feats[-1])
+            else:
+                self.saved_feats.append(np.zeros((256, 7, 7)))
+            #self.saved_feats.append(np.zeros((256, 7, 7)))
+            #self.saved_feats.append(tf.zeros([256, 7, 7], name="extra_feats"))
+            #self.saved_feats.append("no")
 
         return tracklet.boxes[-1], score
 
